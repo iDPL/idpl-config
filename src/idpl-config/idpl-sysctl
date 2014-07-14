@@ -67,15 +67,18 @@ PS="/bin/ps auwx"
 CONFIGDIR=/etc/idpl
 CONFIGFILE=idpl.sysctl
 STATEFILE=system.sysctl
-apply-sysctl() {
+applysysctl() {
 	/sbin/sysctl -p $CONFIGDIR/$CONFIGFILE > /dev/null
 	return $? 
 }
-save-sysctl() {
-	/sbin/sysctl -a > $CONFIGDIR/$STATEFILE 
+savesysctl() {
+	if [ -f $CONFIGDIR/$STATEFILE ]; then /bin/rm $CONFIGDIR/$STATEFILE; fi
+	for i in `/bin/awk -F= '{print $1}' $CONFIGDIR/$CONFIGFILE`; do 
+		/sbin/sysctl $i >> $CONFIGDIR/$STATEFILE 
+	done
 	return $?
 }
-restore-sysctl() {
+restoresysctl() {
 	/sbin/sysctl -p  $CONFIGDIR/$STATEFILE > /dev/null
 	return $?
 }
@@ -84,11 +87,11 @@ restore-sysctl() {
 case "$1" in
     start)
         if [ -d $CONFIGDIR ]; then
-            action $"iDPL save sysctl" save-sysctl 2> /dev/null
+            action $"iDPL save sysctl" savesysctl 2> /dev/null
         fi
 
         if [ -f $CONFIGDIR/$CONFIGFILE ]; then
-            action $"iDPL apply sysctl values" apply-sysctl 2> /dev/null
+            action $"iDPL apply sysctl values" applysysctl 2> /dev/null
         else
             echo -n "$CONFIGDIR/$CONFIGFILE does not exist"
             RETVAL=1
@@ -96,7 +99,7 @@ case "$1" in
         ;;
     stop)
         if [ -f $CONFIGDIR/$STATEFILE ]; then
-            action $"iDPL restore sysctl values" restore-sysctl 2> /dev/null
+            action $"iDPL restore sysctl values" restoresysctl 2> /dev/null
         else
             echo -n "$CONFIGDIR/$STATEFILE does not exist"
             RETVAL=1
