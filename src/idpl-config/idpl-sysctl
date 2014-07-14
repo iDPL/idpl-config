@@ -1,4 +1,9 @@
-# $Id$
+#!/bin/sh
+#
+#
+#
+# chkconfig: 345 98 98
+# description: sets up sysctl for the idpl 
 #
 # @Copyright@
 # 
@@ -53,28 +58,59 @@
 # 
 # @Copyright@
 #
-# $Log$
+#
+#
 
-REDHAT.ROOT = $(CURDIR)/../../
+. /etc/init.d/functions
 
--include $(ROCKSROOT)/etc/Rules.mk
-include Rules.mk
-INITSCRIPT = idpl-sysctl
-CONDORCONFIGS = 50idpl.conf 
-SYSCTLCONFIG = idpl.sysctl
-
-
-build:
-	echo "Nothing to build"	
-
-install::
-	mkdir -p $(ROOT)/etc/init.d
-	install -m 544 $(INITSCRIPT) $(ROOT)/etc/init.d/$(INITSCRIPT)
-	mkdir -p $(ROOT)/opt/condor/etc/config.d
-	install -m 644 $(CONDORCONFIGS) $(ROOT)/opt/condor/etc/config.d
-	mkdir -p $(ROOT)/etc/idpl
-	install -m 644 $(SYSCTLCONFIG) $(ROOT)/etc/idpl
+PS="/bin/ps auwx"
+CONFIGDIR=/etc/idpl
+CONFIGFILE=idpl.sysctl
+STATEFILE=system.sysctl
+apply-sysctl() {
+	/sbin/sysctl -p $CONFIGDIR/$CONFIGFILE > /dev/null
+	return $? 
+}
+save-sysctl() {
+	/sbin/sysctl -a > $CONFIGDIR/$STATEFILE 
+	return $?
+}
+restore-sysctl() {
+	/sbin/sysctl -p  $CONFIGDIR/$STATEFILE > /dev/null
+	return $?
+}
 	
 
-clean::
-	rm -rf $(NAME)-$(VERSION)
+case "$1" in
+    start)
+        if [ -d $CONFIGDIR ]; then
+            action $"iDPL save sysctl" save-sysctl 2> /dev/null
+        fi
+
+        if [ -f $CONFIGDIR/$CONFIGFILE ]; then
+            action $"iDPL apply sysctl values" apply-sysctl 2> /dev/null
+        else
+            echo -n "$CONFIGDIR/$CONFIGFILE does not exist"
+            RETVAL=1
+        fi
+        ;;
+    stop)
+        if [ -f $CONFIGDIR/$STATEFILE ]; then
+            action $"iDPL restore sysctl values" restore-sysctl 2> /dev/null
+        else
+            echo -n "$CONFIGDIR/$STATEFILE does not exist"
+            RETVAL=1
+        fi
+
+        ;;
+    restart)
+        $0 stop
+        $0 start
+        RETVAL=$?
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+
+exit $RETVAL
