@@ -19,5 +19,8 @@
 	</changelog>
 
 	<!-- add edges here -->
+	<edge from="base">
+		<to>idpl-config</to>
+	</edge>
 
 </graph>
