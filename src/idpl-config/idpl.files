@@ -1,3 +1,5 @@
 /etc/idpl
 /etc/init.d/idpl-sysctl
 /opt/condor/etc/config.d/50idpl.conf
+/etc/idpl/ip6tables
+/etc/idpl/iptables
