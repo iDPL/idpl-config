@@ -62,6 +62,7 @@ include Rules.mk
 INITSCRIPT = idpl-sysctl
 CONDORCONFIGS = 50idpl.conf 
 SYSCTLCONFIG = idpl.sysctl
+IDPLETCFILES = iptables ip6tables
 
 
 build:
@@ -74,6 +75,7 @@ install::
 	install -m 644 $(CONDORCONFIGS) $(ROOT)/opt/condor/etc/config.d
 	mkdir -p $(ROOT)/etc/idpl
 	install -m 644 $(SYSCTLCONFIG) $(ROOT)/etc/idpl
+	install -m 644 $(IDPLETCFILES) $(ROOT)/etc/idpl
 	
 
 clean::

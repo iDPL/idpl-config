@@ -1,0 +1,40 @@
+## SANE v6 iptables Configuration
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+
+# Two Chains. 1) a list of hosts 2) a list of ports
+-N IDPLPOOL
+-N IDPLPORTS
+
+# iDPL IPv6 Addresses 
+# mickey.buaa.edu.cn = 2001:da8:203:d406:16da:e9ff:fef9:b68f
+# idpl.elab.cnic.cn = 2400:dd01:1011:1:92b1:1cff:fe0c:740d
+# komatsu.chtc.wisc.edu = 2607:f388:108e:2795::a
+# flashio-osg.calit2.optiputer.net = 2607:f720:1700:31d::61
+# mongo.mayer.optiputer.net = 2607:f720:1700:1b32::6
+# murpa.rocksclusters.org  =  2607:f720:1400:1410:d267:e5ff:fe13:108f 
+
+-A IDPLPOOL --source 2001:da8:203:d406:16da:e9ff:fef9:b68f -j IDPLPORTS
+-A IDPLPOOL --source 2400:dd01:1011:1:92b1:1cff:fe0c:740d -j IDPLPORTS
+-A IDPLPOOL --source 2607:f388:108e:2795::a -j IDPLPORTS
+-A IDPLPOOL --source 2607:f720:1700:31d::61 -j IDPLPORTS
+-A IDPLPOOL --source 2607:f720:1700:1b32::6 -j IDPLPORTS
+-A IDPLPOOL --source 2607:f720:1400:1410:d267:e5ff:fe13:108f -j IDPLPORTS
+
+# Drop NFS.  Allow ssh. Allow non-privileged ports
+-A IDPLPORTS -p tcp  --dport nfs -j DROP
+-A IDPLPORTS -p tcp  --dport ssh -j ACCEPT
+-A IDPLPORTS -p tcp  --dport 1024:65535 -j ACCEPT
+
+-A INPUT -j IDPLPOOL
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A INPUT -p ipv6-icmp -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+## Allow ssh access from anywhere
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
+## Reject anything other than ICMP,ssh from unknown hosts
+-A INPUT -j REJECT --reject-with icmp6-adm-prohibited
+-A FORWARD -j REJECT --reject-with icmp6-adm-prohibited
+COMMIT
