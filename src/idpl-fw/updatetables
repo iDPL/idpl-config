@@ -1,0 +1,44 @@
+#!/bin/bash
+# call as
+# updatechains <newrules> <iptablesfile>
+# prints to stdout an updated version of <iptablesfile>
+#  -- replaces Lines between @IDPLCHAINS@ and @IDPLCHAINS-END@ with updated chains
+#  -- replaces Lines between @IDPLRULE@ and @IDPLRULE-END@ with updated rule
+# 
+# for testing: 
+#  -- updatechains /etc/idpl/iptables.idpl /etc/sysconfig/iptables
+#  -- updatechains /etc/idpl/ip6tables.idpl /etc/sysconfig/ip6tables
+
+# If output looks good, save the output into the correct files and restart
+# eg.
+# f=`mktemp`; /etc/idpl/updatetables /etc/idpl/iptables.idpl /etc/sysconfig/iptables > $f; /bin/mv $f /etc/sysconfig/iptables; service iptables restart
+# f=`mktemp`; /etc/idpl/updatetables /etc/idpl/ip6tables.idpl /etc/sysconfig/ip6tables > $f; /bin/mv $f /etc/sysconfig/ip6tables; service ip6tables restart
+
+## Exract the IDPLCHAINS STANZAs
+CHAINS=`mktemp`
+RULES=`mktemp`
+
+## Extract the Chains and Rules from the distributed files
+sed -n '/@IDPLCHAINS@/,/@IDPLCHAINS-END@/ {
+	/@IDPLCHAINS@/n
+	/@IDPLCHAINS-END@/ !{p}
+     }
+' $1 > $CHAINS 
+sed -n '/@IDPLRULE@/,/@IDPLRULE-END@/ {
+	/@IDPLRULE@/n
+	/@IDPLRULE-END@/ !{p}
+     }
+' $1 > $RULES 
+
+# Delete the old rules and apply the new ones
+sed '/@IDPLCHAINS@/,/@IDPLCHAINS-END@/ {
+	/@IDPLCHAINS@/n
+	/@IDPLCHAINS-END@/ !{d}
+     }' $2 |
+sed '/@IDPLRULE@/,/@IDPLRULE-END@/ {
+	/@IDPLRULE@/n
+	/@IDPLRULE-END@/ !{d}
+     }' |  
+sed -e "/@IDPLCHAINS@/r $CHAINS"  -e "/@IDPLRULE@/r $RULES" 
+if [ -f $RULES ]; then /bin/rm $RULES; fi
+if [ -f $CHAINS ]; then /bin/rm $CHAINS; fi

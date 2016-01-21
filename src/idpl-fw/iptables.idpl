@@ -1,0 +1,34 @@
+## @IDPLCHAINS@
+## Place in the appropriate section of system firewall rules
+# Define Two Chains: IDPLPOOL and IDPLPORTS
+# IDPLPOOL -- hosts that are in IDPL 
+# IDPLPORTS -- Allowable ports
+-N IDPLPOOL
+-N IDPLPORTS
+## Hosts in IDPL
+-A IDPLPOOL  --source 67.58.50.6 -j IDPLPORTS
+-A IDPLPOOL  --source 67.58.50.61 -j IDPLPORTS
+-A IDPLPOOL  --source 137.110.119.113 -j IDPLPORTS
+-A IDPLPOOL  --source 115.25.138.244 -j IDPLPORTS
+-A IDPLPOOL  --source 159.226.15.235  -j IDPLPORTS
+-A IDPLPOOL  --source 159.226.15.238  -j IDPLPORTS
+-A IDPLPOOL  --source 128.104.100.67  -j IDPLPORTS
+-A IDPLPOOL  --source 128.104.153.60  -j IDPLPORTS
+-A IDPLPOOL  --source 202.122.33.181  -j IDPLPORTS
+-A IDPLPOOL  --source 113.55.4.33     -j IDPLPORTS
+
+## PerfSONAR testers
+-A IDPLPOOL  --source 144.92.20.221 -j IDPLPORTS
+-A IDPLPOOL  --source 149.165.255.98  -j IDPLPORTS
+
+### Now Manage the PORTS
+# Drop NFS.  Allow ssh. Allow non-privileged ports
+-A IDPLPORTS -p tcp  --dport nfs -j DROP
+-A IDPLPORTS -p tcp  --dport ssh -j ACCEPT
+-A IDPLPORTS -p tcp  --dport 1024:65535 -j ACCEPT
+## @IDPLCHAINS-END@
+
+## @IDPLRULE@
+### Add in the appropriate place Where IDPL should tested 
+-A INPUT -j IDPLPOOL
+## @IDPLRULE-END@
