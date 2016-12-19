@@ -14,14 +14,14 @@
 # iDPL IPv6 Addresses 
 # mickey.buaa.edu.cn = 2001:da8:203:d406:16da:e9ff:fef9:b68f
 # idpl.elab.cnic.cn = 2400:dd01:1011:1:92b1:1cff:fe0c:740d
-# komatsu.chtc.wisc.edu = 2607:f388:108e:2795::a
+# komatsu.chtc.wisc.edu = 2607:f388:107c:502::c 
 # flashio-osg.calit2.optiputer.net = 2607:f720:1700:31d::61
 # mongo.mayer.optiputer.net = 2607:f720:1700:1b32::6
 # murpa.rocksclusters.org  =  2607:f720:1400:1410:d267:e5ff:fe13:108f 
 
 -A IDPLPOOL --source 2001:da8:203:d406:16da:e9ff:fef9:b68f -j IDPLPORTS
 -A IDPLPOOL --source 2400:dd01:1011:1:92b1:1cff:fe0c:740d -j IDPLPORTS
--A IDPLPOOL --source 2607:f388:108e:2795::a -j IDPLPORTS
+-A IDPLPOOL --source 2607:f388:107c:502::c -j IDPLPORTS
 -A IDPLPOOL --source 2607:f720:1700:31d::61 -j IDPLPORTS
 -A IDPLPOOL --source 2607:f720:1700:1b32::6 -j IDPLPORTS
 -A IDPLPOOL --source 2607:f720:1400:1410:d267:e5ff:fe13:108f -j IDPLPORTS
