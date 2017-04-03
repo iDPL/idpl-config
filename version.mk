@@ -1,5 +1,5 @@
 ROLLNAME	= idpl-config
-VERSION		= 1.2
+VERSION		= 1.5
 RELEASE		= 0
 COLOR		= iceblue
 
